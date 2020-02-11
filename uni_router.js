@@ -52,12 +52,14 @@ const $router = {
 		return new Promise((resolve, reject) => {
 			this._getFullPath(path).then((fullPath) => { // 检查路由是否存在于 pages 中
 				const routeTo = url => { // 执行路由
+					const temp = JSON.parse(JSON.stringify($route)) // 将 $route 缓存起来
+					Object.assign($route, { path, fullPath, query }) // 在路由开始执行前就将 query 放入 $route, 防止少数情况出项的 onLoad 执行时，query 还没有合并
 					UNIAPI({ url }).then(([err]) => {
 						if (err) { // 路由未在 pages.json 中注册
+							$route = temp // 如果路由跳转失败，就将 $route 恢复
 							reject(err.errMsg)
 							return
 						} else { // 跳转成功, 将路由信息赋值给 $route
-							Object.assign($route, { path, fullPath, query })
 							resolve($route) // 将更新后的路由对象 resolve 出去
 							!notAfterEach && this.afterEach($route) // 如果没有禁止全局后置守卫拦截时, 执行全局后置守卫拦截
 						}
