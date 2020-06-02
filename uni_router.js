@@ -45,9 +45,6 @@ const $router = {
 			}
 		})
 	},
-	pop(delta) {
-		uni.navigateBack({ delta })
-	},
 	_routeTo(UNIAPI, path, query, notBeforeEach, notAfterEach) {
 		return new Promise((resolve, reject) => {
 			this._getFullPath(path).then((fullPath) => { // 检查路由是否存在于 pages 中
@@ -77,9 +74,26 @@ const $router = {
 			}).catch(e => reject(e)) // 路由不存在于 pages 中, reject
 		})
 	},
+	resolve: null,
+	pop(data) {
+		uni.navigateBack({ delta: typeof data === 'number' ? data : 1 })
+		if (typeof data === 'object' && this.resolve) {
+			this.resolve(data)
+			this.resolve = null
+		}
+	},
 	// path 路由名 //  query 路由传参 // isBeforeEach 是否要被全局前置守卫拦截 // isAfterEach 是否要被全局后置守卫拦截
 	push(path, query = {}, notBeforeEach, notAfterEach) {
 		return this._routeTo(uni.navigateTo, path, query, notBeforeEach, notAfterEach)
+	},
+	pushPop(path, query = {}, notBeforeEach, notAfterEach) {
+		return new Promise(resolve => {
+			if (this.resolve) {
+				this.resolve(null)
+			}
+			this.resolve = resolve
+			this._routeTo(uni.navigateTo, path, query, notBeforeEach, notAfterEach)
+		})
 	},
 	replace(path, query = {}, notBeforeEach, notAfterEach) {
 		return this._routeTo(uni.redirectTo, path, query, notBeforeEach, notAfterEach)
