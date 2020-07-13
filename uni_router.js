@@ -36,8 +36,8 @@ const router = new Proxy({
 	routes: modulesFiles.keys().map(e => e = e.replace(/^\./, '/pages')), // 路由表
 	_getFullPath(route) { // 根据传进来的路由名称获取完整的路由名称
 		return new Promise((resolve, reject) => {
-			const fullPath = this.routes.find(e => RegExp(route + '.vue').test(e)).replace(/\.vue$/, '')
-			fullPath ? resolve(fullPath) : reject(`路由 ${ route + '.vue' } 不存在于 pages 目录中`)
+			const fullPath = this.routes.find(e => RegExp(route + '.vue').test(e))
+			fullPath ? resolve(fullPath.replace(/\.vue$/, '')) : reject(`路由 ${ route + '.vue' } 不存在于 pages 目录中`)
 		})
 	},
 	_formatData(query) { // 序列化路由传参
@@ -76,8 +76,8 @@ const router = new Proxy({
 					Object.assign(route, { path, fullPath, query, type }) // 在路由开始执行前就将 query 放入 route, 防止少数情况出项的 onLoad 执行时，query 还没有合并
 					UNIAPI({ url }).then(([err]) => {
 						if (err) { // 路由未在 pages.json 中注册
-							route = temp // 如果路由跳转失败，就将 route 恢复
-							reject(err.errMsg)
+							Object.assign(route, temp) // 如果路由跳转失败，就将 route 恢复
+							reject(err)
 							return
 						} else { // 跳转成功, 将路由信息赋值给 route
 							resolve(route) // 将更新后的路由对象 resolve 出去
