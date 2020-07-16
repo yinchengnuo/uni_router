@@ -7,6 +7,7 @@ export const route = { // 当前路由对象所在的 path 等信息。默认为
 	query: {}
 }
 
+let _$ROUTING = false // 标记路由状态 防止连点
 let onchange = () => {} // 路由变化监听函数
 const _$UNI_ACTIVED_PAGE_ROUTES = [] // 页面数据缓存
 let _$UNI_ROUTER_PUSH_POP_FUN = () => {} // pushPop resolve 函数
@@ -15,6 +16,7 @@ const modulesFiles = require.context('@/pages', true, /\.vue$/) // pages 文件�
 
 Vue.mixin({
 	onShow() {
+		_$ROUTING = false
 		const pages = getCurrentPages().map(e => `/${e.route}`).reverse() // 获取页面栈
 		if (pages[0]) { // 当页面栈不为空时执行
 			let old = _c(route)
@@ -70,6 +72,10 @@ const router = new Proxy({
 	},
 	_routeTo(UNIAPI, type, path, query, notBeforeEach, notAfterEach) {
 		return new Promise((resolve, reject) => {
+			if (_$ROUTING) {
+				reject('路由进行中'); return
+			}
+			_$ROUTING = true
 			this._getFullPath(path).then((fullPath) => { // 检查路由是否存在于 pages 中
 				const routeTo = url => { // 执行路由
 					const temp = _c(route) // 将 route 缓存起来
