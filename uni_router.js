@@ -19,12 +19,15 @@ Vue.mixin({
 		_$ROUTING = false
 		const pages = getCurrentPages().map(e => `/${e.route}`).reverse() // 获取页面栈
 		if (pages[0]) { // 当页面栈不为空时执行
-			let old = _c(route)
+			let old = _c(route) // 保存旧路由
 			const back = pages[0] != route.fullPath
 			const now = _$UNI_ACTIVED_PAGE_ROUTES.find(e => e.fullPath == pages[0]) // 如果路由没有被缓存就缓存
 			now ? Object.assign(route, now) : _$UNI_ACTIVED_PAGE_ROUTES.push(_c(route)) // 已缓存就用已缓存的更新 route 对象
 			_$UNI_ACTIVED_PAGE_ROUTES.splice(pages.length, _$UNI_ACTIVED_PAGE_ROUTES.length) // 最后清除无效缓存
 			if (back) { // 当当前路由与 route 对象不符时，表示路由发生返回
+				if (pages.length === 1) { // 如果页面栈只有一个页面，表示正处于 tabbar 页面
+					Object.assign(route, { fullPath: pages[0], path: `/${pages[0].split('/')[3]}`, query: {}, type: "switchTab" })
+				}
 				onchange(route, old)
 			}
 		}
@@ -73,16 +76,18 @@ const router = new Proxy({
 	_routeTo(UNIAPI, type, path, query, notBeforeEach, notAfterEach) {
 		return new Promise((resolve, reject) => {
 			if (_$ROUTING) {
-				reject('路由进行中'); return
+				reject('路由进行中')
+				return
 			}
-			_$ROUTING = true
 			this._getFullPath(path).then((fullPath) => { // 检查路由是否存在于 pages 中
 				const routeTo = url => { // 执行路由
 					const temp = _c(route) // 将 route 缓存起来
 					Object.assign(route, { path, fullPath, query, type }) // 在路由开始执行前就将 query 放入 route, 防止少数情况出项的 onLoad 执行时，query 还没有合并
+					_$ROUTING = true
 					UNIAPI({ url }).then(([err]) => {
 						if (err) { // 路由未在 pages.json 中注册
 							Object.assign(route, temp) // 如果路由跳转失败，就将 route 恢复
+							_$ROUTING = false
 							reject(err)
 							return
 						} else { // 跳转成功, 将路由信息赋值给 route
