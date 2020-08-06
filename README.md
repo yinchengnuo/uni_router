@@ -45,7 +45,7 @@ Vue.prototype.$iRouter = $router // 路由对象，保存了实例方法
 // 在组件中使用
 methods: {
     to() {
-        this.$router.push('/test', {
+        this.$iRouter.push('/test', {
             id: 2333,
             test: {
                 a: 1,
@@ -61,7 +61,7 @@ methods: {
 
 // test 页面中
 onLoad() {
-    console.log(this.$route) // 可以通过 $route 获取当前路由对象、参数、路径信息
+    console.log(this.$iRoute) // 可以通过 $iRoute 获取当前路由对象、参数、路径信息
     // {
     //     fullPath: "/pages/test/test"
     //     path: "/test"
@@ -75,13 +75,13 @@ onLoad() {
     // }
 }
 
-// this.$router 上一共有 6 个方法， 分别是
-this.$router.pop()
-this.$router.push()
-this.$router.pushPop()
-this.$router.replace()
-this.$router.reLaunch()
-this.$router.switchTab()
+// this.$iRouter 上一共有 6 个方法， 分别是
+this.$iRouter.pop()
+this.$iRouter.push()
+this.$iRouter.pushPop()
+this.$iRouter.replace()
+this.$iRouter.reLaunch()
+this.$iRouter.switchTab()
 
 // 除了 pop 方法只接受一个参数 delta 或 data 对象外，其余 5 个方法接受的参数分别是
 fun(
@@ -107,7 +107,7 @@ pop
 // 在组件中使用
 methods: {
     to() {
-        this.$router.pushPop('/test').then(e => {
+        this.$iRouter.pushPop('/test').then(e => {
             if (e) {
                 console.log('路由返回，接收到的数据为', e) // { data: 'data' }
             }
@@ -118,7 +118,7 @@ methods: {
 // test 页面中
 methods: {
     back() {
-        this.$router.pop({ data: 'data' }) // pop 传参时必须为对象
+        this.$iRouter.pop({ data: 'data' }) // pop 传参时必须为对象
     }
 }
 ```
